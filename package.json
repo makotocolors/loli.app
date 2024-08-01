@@ -1,0 +1,17 @@
+{
+  "name": "loli.app",
+  "version": "1.0.0",
+  "description": "A simple and fast way to run your codess in organized files.",
+  "keywords": ["loli", "application"],
+  "author": "P. Makoto Colors",
+  "main": "Application.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/makotocolors/loli.app.git"
+  },
+  "bugs": "https://github.com/makotocolors/loli.app/issues",
+  "homepage": "https://github.com/makotocolors/loli.app#readme",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
