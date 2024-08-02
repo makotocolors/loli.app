@@ -1,8 +1,11 @@
 {
   "name": "loli.app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple and fast way to run your codess in organized files.",
-  "keywords": ["loli", "application"],
+  "keywords": [
+    "loli",
+    "application"
+  ],
   "author": "P. Makoto Colors",
   "main": "Application.js",
   "repository": {
