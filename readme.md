@@ -7,7 +7,9 @@ npm install loli.app@latest
 
 ### Introduction:
 This module provides a quick and easy way to run your code separated into folders based on **[discord.js](https://github.com/discordjs/discord.js)** events. Therefore, it is mandatory to provide the discord.js client, or any compatible client, as a parameter for the code to run.
+
 However, we purposely do not limit the use exclusively to the discord.js client, so you can provide the client of other modules, such as **[eris](https://github.com/abalabahaha/eris)** or **[guilded.js](https://github.com/zaida04/guilded.js)**, we do not guarantee that anything other than the discord.js client will work, use it at your own risk.
+
 Need help even after reading the documentation? Join our **[support server](https://discord.gg/sEXMV36WDW)** on **Discord**.
 ## Basic setup:
 ### Setting up the discord.js client.
@@ -17,7 +19,7 @@ const { Client } = require('discord.js');
 const client = new Client(/*Your options here.*/);
 client.login(/*Your token here.*/);
 ```
-### Setting up the loli.db application.
+### Setting up the loli.app application.
 The value assigned to the "**client**" constant above will be passed as a parameter in the following code. In the following code, there is a brief example of how to select different code folders for specific events:
 ```js
 const Application = require('loli.app');
@@ -70,7 +72,7 @@ client.login(/*Your token here.*/);
 const Application = require('loli.app');
 const app = new Application(client);
 
-app.on('messageCreate', './code folder/' code => {
+app.on('messageCreate', './code folder/', code => {
   code.set(client, EmbedBuilder);
 /* You can send infinite parameters to the set() function,
 all of them will be sent back to your codes. */
