@@ -6,7 +6,8 @@ function filesToArray(directory, extension = '.js') {
     const item = resolve(directory, file);
     if (statSync(item).isDirectory()) {
       arr.push(...filesToArray(item, extension));
-    } else if (!extension || file.endsWith(extension)) {
+    }
+    else if (!extension || file.endsWith(extension)) {
       arr.push(item);
     };
     return arr;
@@ -71,6 +72,20 @@ module.exports = (class Application {
       if (callback && typeof callback === 'function') {
         callback(Object.freeze({
           files: array,
+          suitableFiles: () => {
+            return array.reduce((arr, path) => {
+              const content = require(path);
+              if (content) {
+                if (typeof content === 'function' && content.name === code) {
+                  arr.push(path);
+                }
+                else if (typeof content === 'object' && typeof content[code] === 'function') {
+                  arr.push(path);
+                };
+              };
+              return arr;
+            }, []);
+          },
           set: (...data) => (params = data),
           cache: (event) => (this.cache?.get?.(event) ?? this.cache),
         }));
