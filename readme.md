@@ -2,7 +2,7 @@
 ***A simple and quick way to filter and run your codes!***
 
 ```
-npm install loli.app@latest
+npm i loli.app
 ```
 
 ### Introduction:
@@ -35,10 +35,10 @@ app.on('error', './a directory/inside of a directory/inside of another directory
 ```
 
 ## Basic usage:
-### How to set up codes?
+### How to set up my codes?
 Below you will understand how to organize your codes so that they are executed correctly. When defining a directory, you can insert any files in it, however only files ending in "**.js**" in their name, and the "**code**" property (can be changed) in their structure will be properly executed, any other file that does not meet these two requirements will be ignored by the module. For example:
 
-"**./code directory/random code file.js**"
+"**./directory/random code file.js**"
 ```js
 module.exports = {
   name: "ping", // An *optional* property that exists only for organizational reasons.
@@ -72,7 +72,7 @@ client.login(/*Your token*/);
 const Application = require('loli.app');
 const app = new Application(client);
 
-app.on('messageCreate', './code folder/', (code) => {
+app.on('messageCreate', './directory/', (code) => {
   code.set(client, EmbedBuilder);
 /* You can send infinite parameters to the set() function,
 all of them will be sent back to your codes. */
@@ -81,7 +81,7 @@ all of them will be sent back to your codes. */
 Below is an example of how to receive each parameter individually in your codes:
 ```js
 module.exports = {
-  name: 'Mention',
+  name: 'mention',
   code: (message, client, EmbedBuilder) => {
     const id = message.content.match(/^<@!?(\d+)>$/)?.[1];
     if (id !== client.user.id) return;

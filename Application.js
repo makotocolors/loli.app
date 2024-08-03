@@ -4,11 +4,9 @@ function filesToArray(directory, extension = '.js') {
   const [{ readdirSync, statSync }, { resolve }] = [require('node:fs'), require('node:path')];
   return readdirSync(directory).reduce((arr, file) => {
     const item = resolve(directory, file);
-    if (statSync(item).isDirectory()) {
-      arr.push(...filesToArray(item, extension));
-    }
-    else if (!extension || file.endsWith(extension)) {
-      arr.push(item);
+    const check = statSync(item).isDirectory();
+    if (check || !extension || file.endsWith(extension)) {
+      check? arr.push(...filesToArray(item, extension)): arr.push(item);
     };
     return arr;
   }, []);
@@ -59,11 +57,11 @@ module.exports = (class Application {
         array.forEach(path => {
           const content = require(path);
           if (content) {
-            if (typeof content === 'function' && content.name === code) {
-              this.cache.get(event).set(path, content);
-            }
-            else if (typeof content === 'object' && typeof content[code] === 'function') {
-              this.cache.get(event).set((typeof content[name] === 'string'? content[name]: path), content[code]);
+            const check = (typeof content === 'function' && content.name === code);
+            if (check || typeof content === 'object' && typeof content[code] === 'function') {
+              const contentName = (check || typeof content[name] !== 'string'? path: content[name]);
+              const contentCode = (check? content: content[code]);
+              this.cache.get(event).set(contentName, contentCode);
             };
           };
         });
@@ -72,20 +70,16 @@ module.exports = (class Application {
       if (callback && typeof callback === 'function') {
         callback(Object.freeze({
           files: array,
-          suitableFiles: () => {
-            return array.reduce((arr, path) => {
-              const content = require(path);
-              if (content) {
-                if (typeof content === 'function' && content.name === code) {
-                  arr.push(path);
-                }
-                else if (typeof content === 'object' && typeof content[code] === 'function') {
-                  arr.push(path);
-                };
+          suitableFiles: () => array.reduce((arr, path) => {
+            const content = require(path);
+            if (content) {
+              const check = (typeof content === 'function' && content.name === code);
+              if (check || (typeof content === 'object' && typeof content[code] === 'function')) {
+                arr.push(path);
               };
-              return arr;
-            }, []);
-          },
+            };
+            return arr;
+          }, []),
           set: (...data) => (params = data),
           cache: (event) => (this.cache?.get?.(event) ?? this.cache),
         }));
@@ -97,11 +91,9 @@ module.exports = (class Application {
           else array.forEach(path => {
             const content = require(path);
             if (content) {
-              if (typeof content === 'function' && content.name === code) {
-                content(data, ...params);              
-              }
-              else if (typeof content === 'object' && typeof content[code] === 'function') {
-                content[code](data, ...params);
+              const check = (typeof content === 'function' && content.name === code);
+              if (check || typeof content === 'object' && typeof content[code] === 'function') {
+                check? content(data, ...params): content[code](data, ...params);
               };
             };
           });
