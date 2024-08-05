@@ -43,7 +43,7 @@ Below you will understand how to organize your codes so that they are executed c
 module.exports = {
   name: "ping", // An *optional* property that exists only for organizational reasons.
   code: (message) => {
-    if (message.content.toLowerCase() === '!ping') {
+    if (message.content === '!ping') {
       return message.reply('Pong!');
     };
   }
@@ -52,14 +52,14 @@ module.exports = {
 The previous code can be simplified as follows, however we do not recommend it for aesthetic reasons:
 ```js
 module.exports = code = (message) => {
-  if (message.content.toLowerCase() === '!ping') {
+  if (message.content === '!ping') {
     return message.reply('Pong!');
   };
 };
 ```
 For both examples above, the result will be the same. This:
 
-![image](https://files.catbox.moe/jw0164.png)
+![image](https://files.catbox.moe/gdso67.png)
 
 You can create infinite directories and subdirectories with your code files, however only files ending in "**.js**" in their name, and the "**code**" property in their structure will be properly executed.
 ### How to send additional parameters to my codes?
@@ -87,11 +87,11 @@ module.exports = {
     if (id !== client.user.id) return;
 
     const embed = new EmbedBuilder()
-      .setTitle('Imagine a creative title.')
+      .setTitle('Imagine a creative a title.')
       .setDescription('Now imagine a creative description.');
     
     return message.reply({
-      content: 'And finally, imagine creative content.',
+      content: 'And finally, imagine a creative content.',
       embeds: [embed]
     });
   }
@@ -99,6 +99,6 @@ module.exports = {
 ```
 For the example above, the result will be this:
 
-![image](https://files.catbox.moe/gxn0s4.png)
+![image](https://files.catbox.moe/pdlqt2.png)
 
 > **Made with ❤️ by Makoto Colors!**
