@@ -1,7 +1,7 @@
 {
   "name": "loli.app",
   "description": "A simple and quick way to filter and run your codes!",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": "P. Makoto Colors",
   "main": "Application.js",
   "license": "GPL-3.0",

@@ -87,7 +87,7 @@ module.exports = (class Application {
             }));
           };
           
-          if (this.cache) this.cache.get(event).forEach(code => code(data, ...params));
+          if (this.cache) this.cache.get(event).forEach(code => code(...data, ...params));
           else files.forEach((filePath) => {
             const file = require(filePath);
             typeof file === 'function'? file(...data, ...params): file[code](...data, ...params);
