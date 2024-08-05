@@ -58,27 +58,25 @@ module.exports = (class Application {
         throw new TypeError('InvalidPathProvided', { cause: path });
       };
 
-      const files = filesToArray(path, this.options.filter.extension).map((filePath) => {
-        const file = require(filePath);
-        const isValid = (typeof file === 'function' && file.name === code) ||
-        (file && typeof file === 'object' && typeof file[code] === 'function');
-        return isValid? filePath: null;
-      }).filter(Boolean);
+      const files = filesToArray(path, this.options.filter.extension).filter((file) => {
+        file = require(file);
+        return ((typeof file === 'function' && file.name === code) ||
+        (file && typeof file === 'object' && typeof file[code] === 'function'));
+      });
 
       if (this.cache && !this.cache.has(event)) {
         this.cache.set(event, new this.options.cache.driver());
-        for (const filePath of files) {
-          const file = require(filePath);
-          this.cache.get(event).set(file[name] ?? filePath, file[code] ?? file);
+        for (const [func, file] of files.map((file) => [require(file), file])) {
+          this.cache.get(event).set(func[name] ?? file, func[code] ?? func);
         };
       };
 
       return client.on(event, (...data) => {
-        let params = [];
+        const params = [...data];
         if (callback) {
           if (typeof callback === 'function') callback({
             files,
-            set: (...userParams) => (params = userParams),
+            set: (...userParams) => (params.push(...userParams)),
             cache: (userEvent) => (this.cache?.get?.(userEvent) ?? this.cache),
             event: (userCallback) => {
               if (userCallback) {
@@ -87,14 +85,13 @@ module.exports = (class Application {
               };
               return data;
             }
-          });
+          }, ...data);
           else throw new TypeError('InvalidFunctionProvided', { cause: callback });
         };
           
-        if (this.cache) this.cache.get(event).forEach(code => code(...data, ...params));
-        else for (const filePath of files) {
-          const file = require(filePath);
-          typeof file === 'function'? file(...data, ...params): file[code](...data, ...params);
+        if (this.cache) for (const func of this.cache.get(event)) func(...params);
+        else for (const func of files.map((file) => require(file))) {
+          typeof func === 'function'? func(...params): func[code](...params);
         };
       });
     }
