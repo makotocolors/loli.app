@@ -75,21 +75,22 @@ module.exports = (class Application {
         });
       };
 
-      let params = [];
-      if (callback && typeof callback === 'function') {
-        callback(Object.freeze({
-          files,
-          set: (...data) => (params = data),
-          cache: (event) => (this.cache?.get?.(event) ?? this.cache),
-        }));
-      };
-
-      client.on(event, (data) => {
+      client.on(event, (...data) => {
         try {
+          let params = [];
+          if (callback && typeof callback === 'function') {
+            callback(Object.freeze({
+              files,
+              set: (...userParams) => (params = userParams),
+              cache: (event) => (this.cache?.get?.(event) ?? this.cache),
+              event: (call) => call(...data)
+            }));
+          };
+          
           if (this.cache) this.cache.get(event).forEach(code => code(data, ...params));
           else files.forEach((filePath) => {
             const file = require(filePath);
-            typeof file === 'function'? file(data, ...params): file[code](data, ...params);
+            typeof file === 'function'? file(...data, ...params): file[code](...data, ...params);
           });
         }
         catch (error) {
