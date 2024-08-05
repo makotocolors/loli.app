@@ -4,9 +4,9 @@ let name, code, client = {};
 function filesToArray(directory, extension = '.js') {
   return readdirSync(directory).reduce((arr, file) => {
     const item = resolve(directory, file);
-    const check = statSync(item).isDirectory();
-    if (check || !extension || file.endsWith(extension)) {
-      check? arr.push(...filesToArray(item, extension)): arr.push(item);
+    const isDirectory = statSync(item).isDirectory();
+    if (isDirectory || !extension || file.endsWith(extension)) {
+      isDirectory? arr.push(...filesToArray(item, extension)): arr.push(item);
     };
     return arr;
   }, []);
@@ -60,41 +60,41 @@ module.exports = (class Application {
 
       const files = filesToArray(path, this.options.filter.extension).map((filePath) => {
         const file = require(filePath);
-        const isValidFunction = (typeof file === 'function' && file.name === code);
-        const isValidObject = (file && typeof file === 'object' && typeof file[code] === 'function');
-        if (isValidFunction || isValidObject) return filePath;
-        else return null;
-      }).filter((filePath) => filePath !== null);
+        const isValid = (typeof file === 'function' && file.name === code) ||
+        (file && typeof file === 'object' && typeof file[code] === 'function');
+        return isValid? filePath: null;
+      }).filter(Boolean);
 
       if (this.cache && !this.cache.has(event)) {
         this.cache.set(event, new this.options.cache.driver());
-        files.forEach((filePath) => {
+        for (const filePath of files) {
           const file = require(filePath);
-          const isFunction = typeof file === 'function';
-          this.cache.get(event).set((isFunction || typeof file[name] !== 'string'? filePath: file[name]), (isFunction? file: file[code]));
-        });
+          this.cache.get(event).set(file[name] ?? filePath, file[code] ?? file);
+        };
       };
 
-      client.on(event, (...data) => {
-        try {
-          let params = [];
-          if (callback && typeof callback === 'function') {
-            callback(Object.freeze({
-              files,
-              set: (...userParams) => (params = userParams),
-              cache: (event) => (this.cache?.get?.(event) ?? this.cache),
-              event: (call) => call(...data)
-            }));
-          };
-          
-          if (this.cache) this.cache.get(event).forEach(code => code(...data, ...params));
-          else files.forEach((filePath) => {
-            const file = require(filePath);
-            typeof file === 'function'? file(...data, ...params): file[code](...data, ...params);
+      return client.on(event, (...data) => {
+        let params = [];
+        if (callback) {
+          if (typeof callback === 'function') callback({
+            files,
+            set: (...userParams) => (params = userParams),
+            cache: (userEvent) => (this.cache?.get?.(userEvent) ?? this.cache),
+            event: (userCallback) => {
+              if (userCallback) {
+                if (typeof userCallback === 'function') userCallback(...data); 
+                else throw new TypeError('InvalidFunctionProvided', { cause: userCallback });
+              };
+              return data;
+            }
           });
-        }
-        catch (error) {
-          throw new Error('ReadingError', { cause: error });
+          else throw new TypeError('InvalidFunctionProvided', { cause: callback });
+        };
+          
+        if (this.cache) this.cache.get(event).forEach(code => code(...data, ...params));
+        else for (const filePath of files) {
+          const file = require(filePath);
+          typeof file === 'function'? file(...data, ...params): file[code](...data, ...params);
         };
       });
     }
