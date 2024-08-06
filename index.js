@@ -9,27 +9,40 @@ function filesToArray(directory, extension = '.js') {
       isDirectory? arr.push(...filesToArray(item, extension)): arr.push(item);
     };
     return arr;
-  }, []);
+  }, []).filter((file) => {
+    file = require(file);
+    return ((typeof file === 'function' && file.name === code) ||
+    (file && typeof file === 'object' && typeof file[code] === 'function'));
+  });
 };
 
-function deepMerge(target, source) {
-  for (const key of Object.keys(source)) {
-    if (source[key] instanceof Object && key in target) {
-      Object.assign(source[key], deepMerge(target[key], source[key]));
-    };
+function deepMerge(base, user) {
+  function isPlainObject(obj) {
+    return obj && typeof obj === 'object' && obj.constructor === Object;
   };
-  return Object.assign(target || {}, source || {});
+  
+  for (const key of Object.keys(user)) {
+    if (key in base) {
+      if (typeof user[key] !== typeof base[key]) {
+        throw new TypeError(`Type of key '${key}' must be '${typeof base[key]}', but received '${typeof user[key]}'.`);
+      }
+      if (isPlainObject(user[key]) && isPlainObject(base[key])) {
+        user[key] = deepMerge(base[key], user[key]);
+      }
+    }
+  }
+  return { ...base, ...user };
 };
 
 module.exports = (class Application {
   constructor(userClient, userOptions = {}) {
     try {
       if (!userClient) throw new Error('MissingClient');
-      else if (typeof userClient !== 'object' || Array.isArray(userClient)) {
+      else if (!(userClient instanceof Object) || (userClient instanceof Array)) {
         throw new TypeError('InvalidClientProvided', { cause: userClient });
       };
       if (!userOptions) throw new Error('MissingOptions');
-      else if (typeof userOptions !== 'object' || Array.isArray(userOptions)) {
+      else if (!(userOptions instanceof Object) || (userOptions instanceof Array)) {
         throw new TypeError('InvalidOptionsProvided', { cause: userOptions });
       };
 
@@ -58,16 +71,14 @@ module.exports = (class Application {
         throw new TypeError('InvalidPathProvided', { cause: path });
       };
 
-      const files = filesToArray(path, this.options.filter.extension).filter((file) => {
-        file = require(file);
-        return ((typeof file === 'function' && file.name === code) ||
-        (file && typeof file === 'object' && typeof file[code] === 'function'));
-      });
+      const files = filesToArray(path, this.options.filter.extension);
 
       if (this.cache && !this.cache.has(event)) {
         this.cache.set(event, new this.options.cache.driver());
-        for (const [func, file] of files.map((file) => [require(file), file])) {
-          this.cache.get(event).set(func[name] ?? file, func[code] ?? func);
+        for (const [file, func] of files.map((file) => [file, require(file)])) {
+          const funcName = (typeof func === 'function' || typeof file[name] !== 'string'? file: file[name]);
+          const funcCode = (typeof func === 'function'? func: func[code]);
+          this.cache.get(event).set(funcName, funcCode);
         };
       };
 
@@ -89,7 +100,7 @@ module.exports = (class Application {
           else throw new TypeError('InvalidFunctionProvided', { cause: callback });
         };
           
-        if (this.cache) for (const func of this.cache.get(event)) func(...params);
+        if (this.cache) for (const func of this.cache.get(event)) func[1](...params);
         else for (const func of files.map((file) => require(file))) {
           typeof func === 'function'? func(...params): func[code](...params);
         };

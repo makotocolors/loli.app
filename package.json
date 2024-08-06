@@ -1,9 +1,9 @@
 {
   "name": "loli.app",
   "description": "A simple and quick way to filter and run your codes!",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "author": "P. Makoto Colors",
-  "main": "Application.js",
+  "main": "index.js",
   "license": "GPL-3.0",
   "keywords": [
     "loli",
@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/makotocolors/loli.app.git"
+    "url": "git+https://github.com/makotocolors/loli.app.git"
   },
   "bugs": "https://github.com/makotocolors/loli.app/issues",
   "homepage": "https://github.com/makotocolors/loli.app#readme",
