@@ -1,19 +1,24 @@
-const { readdirSync, statSync } = require('node:fs'), { resolve } = require('node:path');
+const { readdirSync, lstatSync } = require('node:fs'), { resolve } = require('node:path');
 let name, code, client = {};
 
-function filesToArray(directory, extension = '.js') {
-  return readdirSync(directory).reduce((arr, file) => {
-    const item = resolve(directory, file);
-    const isDirectory = statSync(item).isDirectory();
-    if (isDirectory || !extension || file.endsWith(extension)) {
-      isDirectory? arr.push(...filesToArray(item, extension)): arr.push(item);
-    };
-    return arr;
-  }, []).filter((file) => {
-    file = require(file);
-    return ((typeof file === 'function' && file.name === code) ||
-    (file && typeof file === 'object' && typeof file[code] === 'function'));
-  });
+function fileFiltering(directory, extension = '.js') {
+  function filesToArray(dir, ext) {
+    return readdirSync(dir).reduce((arr, file) => {
+      const item = resolve(dir, file);
+      const isDirectory = lstatSync(item).isDirectory();
+      if (isDirectory || !ext || file.endsWith(ext)) {
+        isDirectory? arr.push(...filesToArray(item, ext)): arr.push(item);
+      };
+      return arr;
+    }, []);
+  };
+  
+  return filesToArray(directory, extension)
+    .filter((file) => {
+      file = require(file);
+      return ((typeof file === 'function' && file.name === code) ||
+      (file && typeof file === 'object' && typeof file[code] === 'function'))
+    })
 };
 
 function deepMerge(base, user) {
@@ -24,7 +29,7 @@ function deepMerge(base, user) {
   for (const key of Object.keys(user)) {
     if (key in base) {
       if (typeof user[key] !== typeof base[key]) {
-        throw new TypeError(`Type of key '${key}' must be '${typeof base[key]}', but received '${typeof user[key]}'.`);
+        throw new TypeError('InvalidOptionProvided', { cause: user[key]});
       }
       if (isPlainObject(user[key]) && isPlainObject(base[key])) {
         user[key] = deepMerge(base[key], user[key]);
@@ -71,12 +76,11 @@ module.exports = (class Application {
         throw new TypeError('InvalidPathProvided', { cause: path });
       };
 
-      const files = filesToArray(path, this.options.filter.extension);
-
+      const files = fileFiltering(path, this.options.filter.extension);
       if (this.cache && !this.cache.has(event)) {
         this.cache.set(event, new this.options.cache.driver());
         for (const [file, func] of files.map((file) => [file, require(file)])) {
-          const funcName = (typeof func === 'function' || typeof file[name] !== 'string'? file: file[name]);
+          const funcName = (typeof func === 'function' || typeof func[name] !== 'string'? file: func[name]);
           const funcCode = (typeof func === 'function'? func: func[code]);
           this.cache.get(event).set(funcName, funcCode);
         };
