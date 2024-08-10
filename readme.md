@@ -41,7 +41,10 @@ Below you will understand how to organize your codes so that they are executed c
 "**./directory/random code file.js**"
 ```js
 module.exports = {
-  name: "ping", // An *optional* property that exists only for organizational reasons.
+  data: { // An *optional* property that exists only for organizational reasons.
+    name: 'ping',
+    description: 'Replies with "Pong!" when the "!ping" command is sent in the chat.'
+  }, 
   code: (message) => {
     if (message.content === '!ping') {
       return message.reply('Pong!');
