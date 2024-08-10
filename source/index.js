@@ -13,7 +13,7 @@ class Application {
     this.options = Object.assign(deepMerge({
       nomenclature: { data: 'data', code: 'code' },
       filter: { extension: '.js' },
-      cache: { enable: true, driver: Map }
+      cache: { enable: true, driver: Map },
     }, options), { client });
     this.cache = this.options.cache.enable? new this.options.cache.driver(): null;
   };

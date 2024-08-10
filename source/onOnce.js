@@ -56,6 +56,6 @@ module.exports = ({ options, cache }, { event, path, callback }, funcType) => {
     });
   }
   catch (error) {
-    throw new Error('UnexpectedError', { cause: error })
+    throw new Error('UnexpectedError', { cause: error });
   };
 };
