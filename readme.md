@@ -148,7 +148,7 @@ app.on('messageCreate', './directory/', (code) => {
 ### Is it possible to use the "once()" function?
 Yes, this function is subject to all forms of use of the "**on()**" function, except that this function will only be executed once after the event is triggered. Furthermore, it is worth mentioning that the codes executed using this function are NOT stored in the cache, this is due to the nature of the "**once()**" function which is naturally executed only once, and therefore there is no need to store the codes related to it in the cache:
 ```javascript
-app.once('messageCreate', 'directory');
+app.once('messageCreate', './directory/');
 ```
 ### How can I access the codes that have been stored in the cache?
 There are two ways to do this. The first way is by using the "**cache**" function present in the application:
@@ -162,7 +162,7 @@ so that they are correctly assigned to the cache at the time you request them. *
 
 console.log(app.cache);
 /* This code will provide you with all the codes of all the cached events.
-You can use the "get()" function to specify the codes of which events you want, like this: */
+You can use the "get()" function to specify the codes of which events you want. Like this: */
 console.log(app.cache.get('messageCreate'));
 ```
 The second way to do this is to use the "**cache()**" function present directly as a property of "**code**" in the "**on()**" function, which will also return all the codes of all the events stored in the cache:
@@ -174,7 +174,7 @@ You can specify the event directly in the cache function parameter. Like this: *
   console.log(code.cache('messageCreate'));
 });
 ```
-In addition to the previous examples, you may choose to only want the location of the codes. In this case, the "**paths**" property present in "**code**" of the "**on()**" function will return you an array with all the stored codes of the event that you specified in the second parameter of the "**on()**" function that were cached:
+In addition to the previous examples, you can choose to only want the location of the codes. In this case, the "**paths**" property present in "**code**" of the "**on()**" function will return to you an array object with all the directories for all the codes of the event that you specified in the second parameter of the "**on()**" function that were cached. In this case, even the code directory of the "**once()**" function is present, this is because the program needs to know and store only their location so that they can be executed:
 ```javascript
 app.on('messageCreate', './directory/', (code) => {
   console.log(code.paths);
