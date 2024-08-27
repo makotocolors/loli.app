@@ -1,5 +1,4 @@
 const { readdirSync, lstatSync } = require('node:fs'), { resolve } = require('node:path');
-module.exports = ({ deepMerge, pathsToArray, pathFiltering });
 function deepMerge(primary, secondary) {
   function isPlainObject(obj) {
     return obj && typeof obj === 'object' && obj.constructor === Object;
@@ -16,20 +15,17 @@ function deepMerge(primary, secondary) {
   };
   return { ...primary, ...secondary };
 };
+
 function pathsToArray(directory, extension) {
-  return readdirSync(directory).reduce((arr, file) => {
-    const item = resolve(directory, file);
-    const isDirectory = lstatSync(item).isDirectory();
-    if (isDirectory || !extension || file.endsWith(extension)) {
-      isDirectory? arr.push(...pathsToArray(item, extension)): arr.push(item);
+  return readdirSync(directory).reduce((array, filePath) => {
+    const path = resolve(directory, filePath);
+    const isDirectory = lstatSync(path).isDirectory();
+    if (isDirectory || !extension || filePath.endsWith(extension)) {
+      isDirectory?
+        array.push(...pathsToArray(path, extension)):
+        array.push(path);
     };
-    return arr;
+    return array;
   }, []);
 };
-function pathFiltering(paths, code) {
-  return paths.filter((filePath) => {
-    const file = require(filePath);
-    return ((typeof file === 'function' && file.name === code) ||
-      (file && typeof file === 'object' && typeof file[code] === 'function'));
-  });
-};
+module.exports = ({ deepMerge, pathsToArray });
